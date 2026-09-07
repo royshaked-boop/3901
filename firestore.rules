@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Shared data: every screen in the app that all volunteers see
+    // together (shifts, vehicles, equipment, tasks, etc.) lives here.
+    // Open to anyone who has the app's URL - there's no login system,
+    // so this trusts "only people with the link" the same way the
+    // Google Sheet / WhatsApp group model already does.
+    match /shared_data/{document=**} {
+      allow read, write: if true;
+    }
+
+    // Personal data: scoped per-device (e.g. "my name" on this phone).
+    // Anyone can still technically read/write any device's personal
+    // bucket if they guess the id, but device ids are random and never
+    // shown anywhere, so this is a reasonable trade-off for a small
+    // trusted volunteer team with no login system.
+    match /personal_data/{deviceId}/data/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
